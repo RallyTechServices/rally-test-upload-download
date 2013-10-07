@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Upload Download</title>
+
+    <script type="text/javascript" src="/apps/2.0p5/sdk.js"></script>
+
+    <script type="text/javascript">
+        Rally.onReady(function() {
+            /*
+             */
+            Ext.define('Rally.technicalservices.logger',{
+                constructor: function(config){
+                    Ext.apply(this,config);
+                },
+                log: function(args){
+                    var output_args = [];
+                    if (arguments.length === 0 ) {
+                        window.console && console.log(arguments);
+                        return;
+                    }
+                    if (arguments.length === 1 ) {
+                        output_args = arguments;
+                    } else {
+                        var src_class = arguments[0];
+                        var class_name = "";
+                        if ( typeof(src_class) === "string" ) {
+                            class_name = src_class;
+                        } else if ( typeof src_class.getName === "function") { 
+                            class_name = src_class.getName();
+                        } else if (typeof src_class.self.getName === 'function'){
+                            class_name = src_class.self.getName();
+                        }
+                        //window.console && console.log(class_name,"--",message);
+                        output_args = Ext.Array.push(output_args,[class_name,"--"]);
+                        output_args = Ext.Array.push(output_args,Ext.Array.slice(arguments,1));
+                    }
+                    window.console && console.log.apply(console,output_args);
+                }
+            
+            });            Ext.define('CustomApp', {
+                extend: 'Rally.app.App',
+                componentCls: 'app',
+                defaults: { padding: 5, margin: 5 },
+                logger: new Rally.technicalservices.logger(),
+                items: [
+                    {xtype:'container',itemId:'form_box', defaults: {padding:5,margin:5}, items: [
+                        {xtype:'filefield',itemId:'file_upload_selector'}
+                    ]},
+                    {xtype:'container',itemId:'messages', defaults: {padding:5}, items: [{xtype:'container',html:'Messages:'}]}
+                ],
+                launch: function() {
+                    var me = this;
+                    if ( !this.isAbleToLoadFiles() ) {
+                        alert("Your browser is old");
+                    }
+                    //this.down('#file_upload_selector').on('change',this.getFile,this);
+                    this.down('#file_upload_selector').on('afterrender',function(selector){
+                        this.logger.log(this,this.down('#file_upload_selector').fileInputEl);
+                        selector.fileInputEl.on('change', this.readSingleFile, this);
+                    },this);
+                },
+                isAbleToLoadFiles: function() {
+                    var message_box = this.down('#messages');
+                    
+                    message_box.add({xtype:'container',html:'Checking window.File'});
+                    if ( !window.File) {
+                        return false;
+                    } 
+                    
+                    message_box.add({xtype:'container',html:'Checking window.FileReader'});
+                    if ( !window.FileReader ) {
+                        return false;
+                    }
+                    
+                    message_box.add({xtype:'container',html:'Checking window.FileList'});
+                    if ( !window.FileList ) {
+                        return false;
+                    }
+                    
+                    message_box.add({xtype:'container',html:'Checking window.Blob'});
+                    if ( !window.Blob ) {
+                        return false;
+                    }
+                    
+                    message_box.add({xtype:'container',html:'Finished checking FileReader availability'});
+                    return true;
+                },
+                readSingleFile: function(evt) {
+                    var me = this;
+                    this.logger.log(this,'event',evt);
+                    var f = evt.target.files[0];
+                    this.logger.log(this,'f',f);
+                    if (f){
+                        var r = new FileReader();
+                        this.logger.log(this,'r',r);
+                        r.onload = function(e) {
+                            var contents = e.target.result;
+                            me.logger.log(this,contents);
+                        }
+                    }
+                },
+                getFile: function(selector,value){
+                    this.logger.log(this,selector,value);
+                    this.logger.log(this,selector.extractFileInput());
+                    
+                }
+            });
+
+            Rally.launchApp('CustomApp', {
+                name: 'Test Upload Download'
+            });
+        });
+    </script>
+
+    <style type="text/css">
+        .app {
+             /* Add app styles here */
+        }
+    </style>
+</head>
+<body></body>
+</html>
