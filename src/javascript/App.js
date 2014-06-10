@@ -2,7 +2,7 @@ Ext.define('CustomApp', {
     extend: 'Rally.app.App',
     componentCls: 'app',
     defaults: { padding: 5, margin: 5 },
-    logger: new Rally.technicalservices.logger(),
+    logger: new Rally.technicalservices.Logger(),
     items: [
         {xtype:'container',itemId:'form_box', defaults: {padding:5,margin:5}, items: [
             {xtype:'filefield',itemId:'file_upload_selector'},
